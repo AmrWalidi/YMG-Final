@@ -1,0 +1,11 @@
+services:
+    glassfish:
+        build: ./
+        ports:
+          - "8090:8080"
+    proxy:
+      image: nginx
+      ports:
+        - 80:80
+      depends_on:
+        - glassfish
