@@ -1,21 +1,22 @@
-FROM        openjdk:8-jdk
+FROM openjdk:8-jdk
 
-COPY        dist/HelloWeb.war  /usr/local/glassfish4/glassfish/domains/domain1/autodeploy/
+ENV GLASSFISH_VERSION 4.1.1
+ENV GLASSFISH_HOME /glassfish
 
-ENV         JAVA_HOME         /usr/lib/jvm/java-8-openjdk-amd64
-ENV         GLASSFISH_HOME    /usr/local/glassfish4
-ENV         PATH              $PATH:$JAVA_HOME/bin:$GLASSFISH_HOME/bin
 
-RUN         apt-get update && \
+RUN apt-get update && \
     apt-get install -y curl unzip zip inotify-tools && \
     rm -rf /var/lib/apt/lists/*
 
-RUN         curl -L -o /tmp/glassfish-4.1.zip http://download.java.net/glassfish/4.1/release/glassfish-4.1.zip && \
-    unzip /tmp/glassfish-4.1.zip -d /usr/local && \
-    rm -f /tmp/glassfish-4.1.zip
+RUN wget http://download.oracle.com/glassfish/4.1.1/release/glassfish-${GLASSFISH_VERSION}.zip \
+    && unzip glassfish-${GLASSFISH_VERSION}.zip -d / \
+    && mv /glassfish4 ${GLASSFISH_HOME} \
+    && rm glassfish-${GLASSFISH_VERSION}.zip
 
-EXPOSE      8080 4848 8181
+EXPOSE 8080 4848 
 
-WORKDIR     /usr/local/glassfish4
+WORKDIR /usr/local/glassfish4
 
-CMD         asadmin start-domain --verbose
+COPY dist/HelloWeb.war  /glassfish/glassfish/domains/domain1/autodeploy/
+
+CMD ["sh", "-c", "${GLASSFISH_HOME}/bin/asadmin start-domain -v"]
